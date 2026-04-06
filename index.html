@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Credit Utilization Dashboard</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f6f8;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #ccc;
+        }
+        input {
+            width: 45%;
+            padding: 8px;
+            margin: 5px;
+        }
+        button {
+            padding: 10px 15px;
+            background: blue;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .result {
+            margin-top: 20px;
+        }
+        .low { color: green; }
+        .medium { color: orange; }
+        .high { color: red; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Credit Utilization</h1>
+
+    <div id="cards">
+        <div>
+            <input type="text" placeholder="Card ID" class="card_id">
+            <input type="number" placeholder="Limit" class="limit">
+            <input type="number" placeholder="Balance" class="balance">
+        </div>
+    </div>
+
+    <button onclick="addCard()">Add Card</button>
+    <button onclick="calculate()">Calculate</button>
+
+    <div class="result" id="output"></div>
+</div>
+
+<script>
+function addCard() {
+    const div = document.createElement("div");
+    div.innerHTML = `
+        <input type="text" placeholder="Card ID" class="card_id">
+        <input type="number" placeholder="Limit" class="limit">
+        <input type="number" placeholder="Balance" class="balance">
+    `;
+    document.getElementById("cards").appendChild(div);
+}
+
+function getRisk(util) {
+    if (util < 0.3) return "Low";
+    else if (util <= 0.7) return "Medium";
+    else return "High";
+}
+
+function calculate() {
+    const card_ids = document.getElementsByClassName("card_id");
+    const limits = document.getElementsByClassName("limit");
+    const balances = document.getElementsByClassName("balance");
+
+    let total_balance = 0;
+    let total_limit = 0;
+    let output = "<h3>Results:</h3>";
+
+    for (let i = 0; i < card_ids.length; i++) {
+        let id = card_ids[i].value;
+        let limit = parseFloat(limits[i].value) || 0;
+        let balance = parseFloat(balances[i].value) || 0;
+
+        let util = limit === 0 ? 0 : balance / limit;
+        let risk = getRisk(util);
+
+        total_balance += balance;
+        total_limit += limit;
+
+        output += `
+            <p>
+                Card ${id}: ${(util * 100).toFixed(2)}% 
+                <span class="${risk.toLowerCase()}">(${risk})</span>
+            </p>
+        `;
+    }
+
+    let overall_util = total_limit === 0 ? 0 : total_balance / total_limit;
+    let overall_risk = getRisk(overall_util);
+
+    output += `<hr>
+        <p><b>Overall Utilization:</b> ${(overall_util * 100).toFixed(2)}%</p>
+        <p><b>Overall Risk:</b> <span class="${overall_risk.toLowerCase()}">${overall_risk}</span></p>
+    `;
+
+    document.getElementById("output").innerHTML = output;
+}
+</script>
+
+</body>
+</html>
